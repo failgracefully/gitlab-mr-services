@@ -8,6 +8,8 @@ import (
 	"net/http"
 	//"net/url"
 	"os"
+
+	gitlab "github.com/xanzy/go-gitlab"
 	//"strings"
 )
 
@@ -43,6 +45,27 @@ func main() {
 		}
 		requestBodyAsByteArray, _ := json.Marshal(requestBody)
 		log.Printf("INFO: Received %s", string(requestBodyAsByteArray))
+
+		git := gitlab.NewClient(nil, string([]byte(*privateToken)))
+		git.SetBaseURL("http://localhost:8085/api/v4")
+
+		// in case we opened a new merge request
+		if requestBody.ObjectAttributes.Action == "open" {
+
+			// label it with unique label
+			HandleLabel(*requestBody, git)
+			log.Printf("call bomr after creation")
+
+			// in case we merging a mergerequest
+		} else if requestBody.ObjectAttributes.Action == "merge" {
+
+			// merge linked mergerequests
+			HandleMerge(*requestBody, git)
+
+			// in case the merge request was updated
+		} else if requestBody.ObjectAttributes.Action == "" {
+
+		}
 	})
 
 	log.Printf(fmt.Sprintf("INFO: Listening on port %d", *port))

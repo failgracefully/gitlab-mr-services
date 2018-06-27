@@ -1,0 +1,7 @@
+FROM golang:onbuild
+MAINTAINER Stanley Shyiko <stanley.shyiko@gmail.com>
+
+#ADD git.mib3.crt /usr/local/share/ca-certificates/
+#RUN update-ca-certificates
+
+RUN ln -s /go/bin/app /go/bin/gitlab-mr-services
