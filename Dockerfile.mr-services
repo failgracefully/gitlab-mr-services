@@ -7,6 +7,3 @@ RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && apk add --no-cache git \
     && go get -v -d
 RUN go build
 RUN ln -s /src/gitlab-mr-services/gitlab-mr-services /go/bin/gitlab-mr-services
-
-#ADD git.mib3.crt /usr/local/share/ca-certificates/
-#RUN update-ca-certificates
