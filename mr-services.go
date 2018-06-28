@@ -47,7 +47,8 @@ func main() {
 		log.Printf("INFO: Received %s", string(requestBodyAsByteArray))
 
 		git := gitlab.NewClient(nil, string([]byte(*privateToken)))
-		git.SetBaseURL("http://localhost:8085/api/v4")
+		fmt.Printf("BASE URL: %s", *baseURL)
+		git.SetBaseURL(*baseURL)
 
 		// in case we opened a new merge request
 		if requestBody.ObjectAttributes.Action == "open" {
