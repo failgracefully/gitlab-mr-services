@@ -1,5 +1,5 @@
 FROM golang:alpine
-MAINTAINER Stanley Shyiko <stanley.shyiko@gmail.com>
+MAINTAINER Yotam Cohen <yotam.cohen@endocode.com>
 
 COPY . /src/gitlab-mr-services
 WORKDIR /src/gitlab-mr-services

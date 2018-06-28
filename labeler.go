@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 
 	gitlab "github.com/xanzy/go-gitlab"
@@ -13,7 +12,8 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 	// invent a new label (find somekind of formula)
 	out, err := exec.Command("uuidgen").Output()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf(err.Error())
+		return 1
 	}
 	uuid := string(out[:])
 	// add this label to the project
@@ -21,7 +21,8 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 	created_label, resp, err := git.Labels.CreateLabel(request.Project.Id, &opt, nil)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf(err.Error())
+		return 1
 	}
 
 	if resp.Status == "201 Created" {
@@ -38,7 +39,8 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 		_, resp, err := git.MergeRequests.UpdateMergeRequest(request.Project.Id, request.ObjectAttributes.Iid, &mruopt, nil)
 
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf(err.Error())
+			return 1
 		}
 		fmt.Printf(resp.Status)
 	}
