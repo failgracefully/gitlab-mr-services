@@ -3,7 +3,7 @@ MAINTAINER Stanley Shyiko <stanley.shyiko@gmail.com>
 
 COPY . /src/gitlab-mr-services
 WORKDIR /src/gitlab-mr-services
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && apk add --no-cache git util-linux \ 
+RUN apk add --no-cache git util-linux \ 
     && go get -v -d
 RUN go build
 RUN ln -s /src/gitlab-mr-services/gitlab-mr-services /go/bin/gitlab-mr-services
