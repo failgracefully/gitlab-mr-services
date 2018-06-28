@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	//"net/url"
 	"os"
 
 	gitlab "github.com/xanzy/go-gitlab"
-	//"strings"
 )
 
 func main() {
@@ -47,7 +45,6 @@ func main() {
 		log.Printf("INFO: Received %s", string(requestBodyAsByteArray))
 
 		git := gitlab.NewClient(nil, string([]byte(*privateToken)))
-		fmt.Printf("BASE URL: %s", *baseURL)
 		git.SetBaseURL(*baseURL)
 
 		// in case we opened a new merge request
@@ -55,7 +52,6 @@ func main() {
 
 			// label it with unique label
 			HandleLabel(*requestBody, git)
-			log.Printf("call bomr after creation")
 
 			// in case we merging a mergerequest
 		} else if requestBody.ObjectAttributes.Action == "merge" {
@@ -65,7 +61,7 @@ func main() {
 
 			// in case the merge request was updated
 		} else if requestBody.ObjectAttributes.Action == "" {
-
+			//Originally called the pipeline, currently lives side by side
 		}
 	})
 

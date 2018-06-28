@@ -1,14 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 
 	gitlab "github.com/xanzy/go-gitlab"
 )
-
-//"net/url"
-//"strings"
 
 func HandleLabel(request requestBody, git *gitlab.Client) int {
 
@@ -26,9 +24,6 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 		log.Fatal(err)
 	}
 
-	// add this label to the merge request
-	//	var labels gitlab.Labels
-	//	labels = append(labels, label)
 	if resp.Status == "201 Created" {
 
 		var mr_labels []string
@@ -39,9 +34,13 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 
 		printSlice(mr_labels)
 		mruopt := gitlab.UpdateMergeRequestOptions{Labels: mr_labels}
-		git.MergeRequests.UpdateMergeRequest(request.Project.Id, request.ObjectAttributes.Id, &mruopt, nil)
+		fmt.Printf("Projectid: %d, mergerequestid: %d, %+v \n", request.Project.Id, request.ObjectAttributes.Id, &mruopt)
+		_, resp, err := git.MergeRequests.UpdateMergeRequest(request.Project.Id, request.ObjectAttributes.Iid, &mruopt, nil)
 
-		// optional: add to the description a line that describe this label
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf(resp.Status)
 	}
 	return 0
 }

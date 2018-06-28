@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/xanzy/go-gitlab"
-	//"net/url"
-	//"strings"
 )
 
 func HandleMerge(request requestBody, git *gitlab.Client) int {

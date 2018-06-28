@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	//"net/url"
 	"os"
-	//"strings"
 )
 
 type requestBody struct {
@@ -18,6 +16,7 @@ type requestBody struct {
 		SourceBranch    string `json:"source_branch"`
 		SourceProjectId int    `json:"source_project_id"`
 		Id              int    `json:"id"`
+		Iid             int    `json:"iid"`
 		State           string `json:"state"` // merged, opened or closed
 		Action          string `json:"action"`
 		LastCommit      struct {
