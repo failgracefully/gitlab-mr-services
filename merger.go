@@ -43,7 +43,7 @@ func HandleMerge(request requestBody, git *gitlab.Client) int {
 		//merge them
 		if bCanBeMerged {
 			for _, mr := range mergerequests {
-				if mr.ID != request.ObjectAttributes.Id {
+				if mr.ID != request.ObjectAttributes.Id && mr.State != "merged" {
 					amropt := gitlab.AcceptMergeRequestOptions{}
 					_, _, err = git.MergeRequests.AcceptMergeRequest(mr.ProjectID, mr.IID, &amropt, nil)
 
