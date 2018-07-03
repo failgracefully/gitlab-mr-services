@@ -26,14 +26,18 @@ func main() {
 		printWarning("Warning: --private_token is not set")
 	}
 
-	http.HandleFunc("/router", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/hook", func(w http.ResponseWriter, r *http.Request) {
 		queryPrivateToken := r.URL.Query().Get("private_token")
 		var privateToken *string
+
+		// Override token given at service startup if defined in WebHook
 		if queryPrivateToken != "" {
 			privateToken = &queryPrivateToken
 		} else {
 			privateToken = privateTokenGlobal
 		}
+
+		// In case token wasnt given at WebHook or at service init
 		if *privateToken == "" {
 			fmt.Fprintf(os.Stderr, "Error: private_token is required\n")
 		}
@@ -45,56 +49,63 @@ func main() {
 		}
 
 		requestBodyAsByteArray, _ := json.Marshal(requestBody)
-		//		log.Printf("INFO: Received %s", string(requestBodyAsByteArray))
-		log.Printf("[ROUTER] INFO: Received MR: %d with action %s", requestBody.ObjectAttributes.Id, requestBody.ObjectAttributes.Action)
-		callRest(requestBodyAsByteArray)
+		log.Printf("[ROUTER] INFO: Received MR: %d with action: %s", requestBody.ObjectAttributes.Id, requestBody.ObjectAttributes.Action)
 
 		git := gitlab.NewClient(nil, string([]byte(*privateToken)))
 		git.SetBaseURL(*baseURL)
 
-		// in case we opened a new merge request
+		// Determine what to do based on request's action
 		if requestBody.ObjectAttributes.Action == "open" {
 
-			// label it with unique label
+			// Label it with unique label
 			log.Printf("[ROUTER] Handle labeling for MR %d", requestBody.ObjectAttributes.Id)
 			HandleLabel(*requestBody, git)
 
-			// call BOMR
+			// Call ci build service
+			callBomr(requestBodyAsByteArray)
 
-			// in case we merging a mergerequest
 		} else if requestBody.ObjectAttributes.Action == "merge" {
 
 			log.Printf("[ROUTER] Handle merging for MR %d", requestBody.ObjectAttributes.Id)
-			// merge linked mergerequests
+			// Merge linked mergerequests
 			HandleMerge(*requestBody, git)
 
-			// in case the merge request was updated
 		} else if requestBody.ObjectAttributes.Action == "update" {
-			//Originally called the pipeline, currently lives side by side
-			//call bomr
+
+			// Call ci build service
+			callBomr(requestBodyAsByteArray)
 		}
 	})
 
 	log.Printf(fmt.Sprintf("[ROUTER] INFO: Listening on port %d", *port))
+
+	// Open channel for incoming requests with specific port
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
-func callRest(jsonStr []byte) int {
+// Redirect merge requests to bomr service
+func callBomr(jsonStr []byte) int {
+
+	// address of bomr service inside docker container
 	url := "http://localhost:8080/hook"
 	log.Printf("[ROUTER] sending to bomr")
+
+	// create the POST request
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
+	// Open http channel and send the request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
+
+	// Close reader when fuction returns
 	defer resp.Body.Close()
 
-	log.Println("[ROUTER] response Status:", resp.Status)
-	log.Println("[ROUTER] response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
+	log.Println("[ROUTER] BOMR resp Status:", resp.Status)
 	log.Println("[ROUTER] response Body:", string(body))
 
 	return 0
