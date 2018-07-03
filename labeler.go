@@ -74,7 +74,7 @@ func cleanLabels(projectId int, git *gitlab.Client) int {
 	for _, label := range projectLabels {
 
 		// Check if label is unused
-		if label.OpenIssuesCount > 0 || label.OpenMergeRequestsCount > 0 || label.ClosedIssuesCount > 0 {
+		if label.OpenIssuesCount == 0 && label.OpenMergeRequestsCount == 0 && label.ClosedIssuesCount == 0 {
 
 			// Delete label is determined as unused
 			dopt := gitlab.DeleteLabelOptions{Name: gitlab.String(label.Name)}
