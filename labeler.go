@@ -9,6 +9,8 @@ import (
 
 func HandleLabel(request requestBody, git *gitlab.Client) int {
 
+	cleanLabels(request.Project.Id, git)
+
 	// Create new guid to be used as label
 	out, err := exec.Command("uuidgen").Output()
 	if err != nil {
