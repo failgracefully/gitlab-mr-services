@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os/exec"
 
 	gitlab "github.com/xanzy/go-gitlab"
@@ -44,14 +46,16 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 
 		// Update merge request with current labels with additional new label
 		mruopt := gitlab.UpdateMergeRequestOptions{Labels: mr_labels}
-		fmt.Printf("Projectid: %d, mergerequestid: %d, %+v \n", request.Project.Id, request.ObjectAttributes.Id, &mruopt)
+		log.Printf("Projectid: %d, mergerequestid: %d, %+v \n", request.Project.Id, request.ObjectAttributes.Id, &mruopt)
 		_, resp, err := git.MergeRequests.UpdateMergeRequest(request.Project.Id, request.ObjectAttributes.Iid, &mruopt, nil)
 
 		if err != nil {
-			fmt.Printf(err.Error())
+			log.Printf(err.Error())
 			return 1
 		}
-		fmt.Printf(resp.Status)
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Println("[LABELER] response Body:", string(body))
+		log.Printf(resp.Status)
 	}
 	return 0
 }

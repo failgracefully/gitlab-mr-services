@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -49,31 +48,37 @@ func main() {
 		}
 
 		requestBodyAsByteArray, _ := json.Marshal(requestBody)
-		log.Printf("[ROUTER] INFO: Received MR: %d with action: %s", requestBody.ObjectAttributes.Id, requestBody.ObjectAttributes.Action)
 
-		git := gitlab.NewClient(nil, string([]byte(*privateToken)))
-		git.SetBaseURL(*baseURL)
+		if requestBody.ObjectKind == "merge_request" {
 
-		// Determine what to do based on request's action
-		if requestBody.ObjectAttributes.Action == "open" {
+			log.Printf("[ROUTER] INFO: Received MR: %d with action: %s", requestBody.ObjectAttributes.Id, requestBody.ObjectAttributes.Action)
 
-			// Label it with unique label
-			log.Printf("[ROUTER] Handle labeling for MR %d", requestBody.ObjectAttributes.Id)
-			HandleLabel(*requestBody, git)
+			git := gitlab.NewClient(nil, string([]byte(*privateToken)))
+			git.SetBaseURL(*baseURL)
 
-			// Call ci build service
-			callBomr(requestBodyAsByteArray)
+			// Determine what to do based on request's action
+			if requestBody.ObjectAttributes.Action == "open" {
 
-		} else if requestBody.ObjectAttributes.Action == "merge" {
+				// Label it with unique label
+				log.Printf("[ROUTER] Handle labeling for MR %d", requestBody.ObjectAttributes.Id)
+				HandleLabel(*requestBody, git)
 
-			log.Printf("[ROUTER] Handle merging for MR %d", requestBody.ObjectAttributes.Id)
-			// Merge linked mergerequests
-			HandleMerge(*requestBody, git)
+				// Call ci build service
+				//callBomr(requestBodyAsByteArray)
 
-		} else if requestBody.ObjectAttributes.Action == "update" {
+			} else if requestBody.ObjectAttributes.Action == "merge" {
 
-			// Call ci build service
-			callBomr(requestBodyAsByteArray)
+				log.Printf("[ROUTER] Handle merging for MR %d", requestBody.ObjectAttributes.Id)
+				// Merge linked mergerequests
+				HandleMerge(*requestBody, git)
+
+			} else if requestBody.ObjectAttributes.Action == "update" {
+
+				// Call ci build service
+				if len(requestBody.Labels) > 0 {
+					callBomr(requestBodyAsByteArray)
+				}
+			}
 		}
 	})
 
@@ -104,9 +109,7 @@ func callBomr(jsonStr []byte) int {
 	// Close reader when fuction returns
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
 	log.Println("[ROUTER] BOMR resp Status:", resp.Status)
-	log.Println("[ROUTER] response Body:", string(body))
 
 	return 0
 }
