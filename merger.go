@@ -12,7 +12,9 @@ func HandleMerge(request requestBody, git *gitlab.Client) int {
 	var mr_labels []string
 
 	for _, label := range request.Labels {
-		mr_labels = append(mr_labels, label.Title)
+		if IsValidUUID(label.Title) {
+			mr_labels = append(mr_labels, label.Title)
+		}
 	}
 
 	printSlice(mr_labels)
