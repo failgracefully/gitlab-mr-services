@@ -19,7 +19,7 @@ func HandleLabel(request requestBody, git *gitlab.Client) int {
 		fmt.Printf(err.Error())
 		return 1
 	}
-	uuid := string(out[:])
+	uuid := "MM-" + string(out[:])
 
 	// Add this label to the project
 	opt := gitlab.CreateLabelOptions{Name: gitlab.String(uuid), Color: gitlab.String("#0033CC")}
