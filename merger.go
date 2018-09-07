@@ -32,6 +32,17 @@ func HandleMerge(request requestBody, git *gitlab.Client) int {
 	if len(mergerequests) > 0 && resp.Status == "200 OK" {
 		fmt.Printf("Found %d Merge Requests \n", len(mergerequests))
 
+		// Check that there are no merge requests from the same project
+		var mr_projects []int
+		for _, mr := range mergerequests {
+			b, index := in_array(mr.ProjectID, mr_projects)
+			if b {
+				return index
+			} else {
+				mr_projects = append(mr_projects, mr.ProjectID)
+			}
+		}
+
 		// for each of the merge requests, make sure they can be automerged without any errors
 		bCanBeMerged := true
 		for _, mr := range mergerequests {
