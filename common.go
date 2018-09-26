@@ -26,7 +26,13 @@ type requestBody struct {
 		} `json:"last_commit"`
 		WorkInProgress bool `json:"work_in_progress"`
 	} `json:"object_attributes"`
-	Labels []label `json:"labels"`
+	Labels  []label `json:"labels"`
+	Changes struct {
+		Labels struct {
+			Previous []label `json:"previous"`
+			Current  []label `json:"current"`
+		} `json:"labels"`
+	} `json:"changes"`
 }
 
 type label struct {
