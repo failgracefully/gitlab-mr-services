@@ -57,7 +57,7 @@ func main() {
 			git.SetBaseURL(*baseURL)
 
 			// Determine what to do based on request's action
-			if requestBody.ObjectAttributes.Action == "open" {
+			if requestBody.ObjectAttributes.Action == "open" && requestBody.Project.Id != 1907 {
 
 				// Label it with unique label
 				log.Printf("[ROUTER] Handle labeling for MR %d", requestBody.ObjectAttributes.Id)
